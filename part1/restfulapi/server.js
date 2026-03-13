@@ -1,13 +1,17 @@
+require('dotenv').config();
+
 const express = require('express'),
     app = express(),
-    port = process.env.PORT || 3000;
+    port = process.env.PORT || 3000,
     mongoose = require('mongoose'),
     Task = require('./api/models/todoListModel'), // created model loading here
     bodyParser = require('body-parser');
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb+srv://louvinhluan:luanvinhlou@fgw-web2.omscims.mongodb.net/louvinhluan?appName=FGW-Web2');
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("MongoDB connected"))
+    .catch(err => console.log(err));
 // mongoose.connect('mongodb://localhost/TodoDb');
 
 app.use(bodyParser.urlencoded({ extended: true }));
