@@ -4,12 +4,28 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+
+// Models
 global.Response = require('./api/models/responseModel');
-const routes = require('./api/routes/responseRoutes');
+require('./api/models/userModel');
+require('./api/models/ticketModel');
+
+// Routes
+const responseRoutes = require('./api/routes/responseRoutes');
+const authRoutes = require('./api/routes/authRoutes');
+const adminRoutes = require('./api/routes/adminRoutes');
+const ticketRoutes = require('./api/routes/ticketRoutes');
+
+// Seed
+const seedAdmin = require('./api/seedAdmin');
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
-    .then(() => console.log("MongoDB connected"))
+    .then(() => {
+        console.log("MongoDB connected");
+        // Seed default admin account on first startup
+        seedAdmin();
+    })
     .catch(err => console.log(err));
 
 const port = process.env.PORT || 3000;
@@ -19,7 +35,11 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-routes(app);
+authRoutes(app);
+responseRoutes(app);
+adminRoutes(app);
+ticketRoutes(app);
+
 app.listen(port);
 app.use((req, res) => {
     res.status(404).send({ url: `${req.originalUrl} not found` });

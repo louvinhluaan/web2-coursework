@@ -1,16 +1,18 @@
 const helpdeskResponseLibrary = require('../controllers/responseController');
+const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+
 module.exports = (app) => {
     app
         .route('/responses')
-        .get(helpdeskResponseLibrary.getAllResponses)
-        .post(helpdeskResponseLibrary.createResponse);
+        .get(verifyToken, helpdeskResponseLibrary.getAllResponses)
+        .post(verifyToken, isAdmin, helpdeskResponseLibrary.createResponse);
         
     app
         .route('/responses/:responseId')
-        .get(helpdeskResponseLibrary.getResponseById)
-        .put(helpdeskResponseLibrary.updateResponse)
-        .delete(helpdeskResponseLibrary.deleteResponse);
+        .get(verifyToken, helpdeskResponseLibrary.getResponseById)
+        .put(verifyToken, isAdmin, helpdeskResponseLibrary.updateResponse)
+        .delete(verifyToken, isAdmin, helpdeskResponseLibrary.deleteResponse);
 
     app.route('/responses/:responseId/status')
-        .put(helpdeskResponseLibrary.updateResponseStatus);
+        .put(verifyToken, isAdmin, helpdeskResponseLibrary.updateResponseStatus);
 };
