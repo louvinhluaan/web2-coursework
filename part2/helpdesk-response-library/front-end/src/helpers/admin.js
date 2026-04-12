@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { handleError } from './errorHandler';
+
 import { auth } from './auth';
 import router from '../router';
 
@@ -25,12 +27,7 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-const handleError = fn => (...params) =>
-    fn(...params).catch(error => {
-        if (error.response) {
-            vm.flash(`${error.response.status}: ${error.response.statusText}`, 'error');
-        }
-    });
+
 
 export const adminApi = {
     // Stats

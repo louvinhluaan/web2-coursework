@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { handleError } from './errorHandler';
+
 
 const baseURL = 'http://localhost:3000/auth/';
 
@@ -12,12 +14,7 @@ axiosInstance.interceptors.request.use((config) => {
     return config;
 });
 
-const handleError = fn => (...params) =>
-    fn(...params).catch(error => {
-        if (error.response) {
-            vm.flash(`${error.response.status}: ${error.response.statusText}`, 'error');
-        }
-    });
+
 
 export const auth = {
     async login(username, password) {

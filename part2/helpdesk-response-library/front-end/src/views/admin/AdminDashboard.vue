@@ -102,6 +102,7 @@
             <th>Full Name</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Status</th>
             <th>Created</th>
             <th>Actions</th>
           </tr>
@@ -116,10 +117,19 @@
                 {{ user.role }}
               </span>
             </td>
+            <td style="text-transform: capitalize;">
+              <span class="ui mini label" :class="user.status === 'active' ? 'green' : 'grey'">
+                {{ user.status || 'active' }}
+              </span>
+            </td>
             <td>{{ formatDate(user.created_date) }}</td>
             <td class="center aligned">
               <button class="ui mini primary button" @click="openEditModal(user)">
                 <i class="edit icon"></i> Edit
+              </button>
+              <button class="ui mini button" :class="(!user.status || user.status === 'active') ? 'red' : 'green'" @click="toggleUserStatus(user)">
+                <i :class="(!user.status || user.status === 'active') ? 'ban icon' : 'check icon'"></i>
+                {{ (!user.status || user.status === 'active') ? 'Deactivate' : 'Activate' }}
               </button>
             </td>
           </tr>
@@ -168,6 +178,12 @@
               <button class="ui mini teal button" @click="openTicketModal(ticket)">
                 <i class="eye icon"></i> View
               </button>
+              <button v-if="ticket.status !== 'deleted'" class="ui mini red button" @click="deleteTicket(ticket)">
+                <i class="trash icon"></i> Delete
+              </button>
+              <button v-else class="ui mini green button" @click="restoreTicket(ticket)">
+                <i class="undo icon"></i> Restore
+              </button>
             </td>
           </tr>
           <tr v-if="tickets.length === 0">
@@ -180,6 +196,25 @@
           </tr>
         </tbody>
       </table>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="ui dimmer modals page transition visible active" v-if="showDeleteTicketModal" @click.self="cancelDeleteTicket" style="display: flex !important; align-items: center; justify-content: center;">
+      <div class="ui mini modal transition visible active" @click.stop style="display: block !important; position: relative;">
+        <div class="header">
+          Confirm Deletion
+        </div>
+        <div class="content">
+          <p>Are you sure you want to delete this ticket?</p>
+        </div>
+        <div class="actions">
+          <button class="ui button" @click="cancelDeleteTicket">
+            Cancel
+          </button>
+          <button class="ui negative button" @click="confirmDeleteTicket">
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Edit User Modal -->
@@ -262,6 +297,7 @@
                 <option value="in_progress">In Progress</option>
                 <option value="resolved">Resolved</option>
                 <option value="closed">Closed</option>
+                <option value="deleted">Deleted</option>
               </select>
             </div>
             <div class="field">
@@ -315,6 +351,9 @@ export default {
       ticketReply: '',
       ticketError: '',
       ticketSuccess: '',
+      // Ticket delete modal
+      showDeleteTicketModal: false,
+      ticketToDelete: null,
     };
   },
   computed: {
@@ -372,7 +411,7 @@ export default {
       return status.replace(/_/g, ' ');
     },
     statusColor(status) {
-      const colors = { open: 'green', in_progress: 'yellow', resolved: 'blue', closed: 'grey' };
+      const colors = { open: 'green', in_progress: 'yellow', resolved: 'blue', closed: 'grey', deleted: 'red' };
       return colors[status] || 'grey';
     },
 
@@ -382,10 +421,53 @@ export default {
       try {
         await api.updateResponseStatus(res._id, newStatus);
         res.status = newStatus;
-        // Tự động load lại stats cục bộ để số ở AdminDashboard cập nhật ngay
         this.stats = await adminApi.getStats();
       } catch (err) {
         console.error('Failed to update status', err);
+      }
+    },
+
+    // Toggle User Status
+    async toggleUserStatus(user) {
+      const newStatus = (!user.status || user.status === 'active') ? 'inactive' : 'active';
+      try {
+        await adminApi.updateUser(user._id, { status: newStatus });
+        user.status = newStatus;
+        this.stats = await adminApi.getStats();
+      } catch (err) {
+        console.error('Failed to update user status', err);
+      }
+    },
+
+    // Delete / Restore Ticket directly
+    deleteTicket(ticket) {
+      this.ticketToDelete = ticket;
+      this.showDeleteTicketModal = true;
+    },
+    cancelDeleteTicket() {
+      this.showDeleteTicketModal = false;
+      this.ticketToDelete = null;
+    },
+    async confirmDeleteTicket() {
+      if (!this.ticketToDelete) return;
+      const ticket = this.ticketToDelete;
+      this.showDeleteTicketModal = false;
+      try {
+        await adminApi.updateTicketStatus(ticket._id, { status: 'deleted' });
+        ticket.status = 'deleted';
+        this.stats = await adminApi.getStats();
+      } catch (err) {
+        console.error('Failed to delete ticket', err);
+      }
+      this.ticketToDelete = null;
+    },
+    async restoreTicket(ticket) {
+      try {
+        await adminApi.updateTicketStatus(ticket._id, { status: 'open' });
+        ticket.status = 'open';
+        this.stats = await adminApi.getStats();
+      } catch (err) {
+        console.error('Failed to restore ticket', err);
       }
     },
 

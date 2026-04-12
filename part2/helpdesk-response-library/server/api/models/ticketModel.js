@@ -24,7 +24,7 @@ const TicketSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ["open", "in_progress", "resolved", "closed"],
+            enum: ["open", "in_progress", "resolved", "closed", "deleted"],
             default: "open",
             lowercase: true,
             index: true,

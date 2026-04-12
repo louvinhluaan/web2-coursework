@@ -32,7 +32,10 @@ exports.createTicket = async (req, res) => {
 // GET /tickets/mytickets — Get tickets submitted by current user
 exports.getMyTickets = async (req, res) => {
     try {
-        const tickets = await Ticket.find({ submitted_by: req.user.id })
+        const tickets = await Ticket.find({ 
+            submitted_by: req.user.id,
+            status: { $ne: 'deleted' }
+        })
             .populate('submitted_by', 'username fullName')
             .sort({ created_date: -1 });
         res.json(tickets);
@@ -78,7 +81,7 @@ exports.getTicketById = async (req, res) => {
 exports.updateTicketStatus = async (req, res) => {
     try {
         const { status, admin_reply } = req.body;
-        const allowedStatus = ['open', 'in_progress', 'resolved', 'closed'];
+        const allowedStatus = ['open', 'in_progress', 'resolved', 'closed', 'deleted'];
 
         if (status && !allowedStatus.includes(status)) {
             return res.status(400).json({ message: 'Invalid status.' });

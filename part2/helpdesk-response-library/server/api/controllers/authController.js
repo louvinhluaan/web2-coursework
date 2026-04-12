@@ -66,6 +66,10 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid username or password.' });
         }
 
+        if (user.status === 'inactive') {
+            return res.status(403).json({ message: 'Account is inactive. Please contact admin.' });
+        }
+
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid username or password.' });

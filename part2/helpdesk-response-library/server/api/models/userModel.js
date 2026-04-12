@@ -37,6 +37,13 @@ const UserSchema = new Schema(
             default: "staff",
             lowercase: true,
         },
+        status: {
+            type: String,
+            enum: ["active", "inactive"],
+            default: "active",
+            lowercase: true,
+            index: true,
+        },
         created_date: {
             type: Date,
             default: Date.now,

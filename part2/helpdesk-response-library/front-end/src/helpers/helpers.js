@@ -1,18 +1,10 @@
 import axios from 'axios';
-import Vue from 'vue';
-import VueFlashMessage from 'vue-flash-message';
-import 'vue-flash-message/dist/vue-flash-message.min.css';
+import { handleError } from './errorHandler';
+
 import { auth } from './auth';
 import router from '../router';
 
-Vue.use(VueFlashMessage, {
-    messageOptions: {
-        timeout: 3000,
-        pauseOnInteract: true,
-    }
-});
 
-const vm = new Vue();
 const baseURL = 'http://localhost:3000/responses/';
 
 // Create axios instance with auth header
@@ -38,12 +30,7 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-const handleError = fn => (...params) =>
-    fn(...params).catch(error => {
-        if (error.response) {
-            vm.flash(`${error.response.status}: ${error.response.statusText}`, 'error');
-        }
-    });
+
 
 export const api = {
     getResponse: handleError(async id => {

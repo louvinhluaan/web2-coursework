@@ -49,12 +49,13 @@ exports.getAllUsers = async (req, res) => {
 // PUT /admin/users/:id
 exports.updateUser = async (req, res) => {
     try {
-        const { fullName, email, role } = req.body;
+        const { fullName, email, role, status } = req.body;
         const updateData = {};
 
         if (fullName) updateData.fullName = fullName;
         if (email) updateData.email = email;
         if (role && ['admin', 'staff'].includes(role)) updateData.role = role;
+        if (status && ['active', 'inactive'].includes(status)) updateData.status = status;
 
         const user = await User.findByIdAndUpdate(
             req.params.id,

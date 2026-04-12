@@ -90,7 +90,7 @@ exports.deleteResponse = async (req, res) => {
             return res.status(404).json({ message: 'Response not found.' });
         }
         res.json({
-            message: 'Response successfully deleted (soft delete).',
+            message: 'Response successfully deleted.',
             _id: response._id,
         });
     } catch (err) {
