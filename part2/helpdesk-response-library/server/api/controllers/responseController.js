@@ -1,95 +1,99 @@
-const { response } = require('express');
 const mongoose = require('mongoose');
 const Response = mongoose.model('Responses');
 
-exports.getAllResponses = (req, res) => {
-    // If request has query ?all=true from Admin, get all. Otherwise, get only active responses
-    // Response.find({}, (err, responses) => {
-    const query = req.query.all === 'true' ? {} : { status: 'active' };
-    
-    Response.find(query, (err, responses) => {
-        if (err) res.send(err);
-        res.json(responses);
-    });
-};
-
-exports.createResponse = (req, res) => {
-    const newResponse = new Response(req.body);
-    newResponse.save((err, response) => {
-        if (err) res.send(err);
-        res.json(response);
-    });
-};
-
-exports.getResponseById = (req, res) => {
-    Response.findById(req.params.responseId, (err, response) => {
-        if (err) res.send(err);
-        res.json(response);
-    });
-};
-
-exports.updateResponse = (req, res) => {
-    Response.findOneAndUpdate(
-        { _id: req.params.responseId },
-        req.body,
-        { new: true },
-        (err, response) => {
-            if (err) res.send(err);
-            res.json(response);
-        }
-    );
-};
-
-// Admin Only
-exports.updateResponseStatus = (req, res) => {
+// GET /responses — Get all active responses for non-admin
+exports.getAllResponses = async (req, res) => {
     try {
-        const allowedStatus = ["active", "inactive"];
-        if (!allowedStatus.includes(req.body.status)) {
-            return res.status(400).json({
-                message: "Invalid status"
-            });
-        }
-
-        Response.findByIdAndUpdate(
-            req.params.responseId,
-            { status: req.body.status },
-            { new: true, runValidators: true },
-            (err, response) => {
-                if (err) res.send(err);
-                res.json({
-                    message: 'Response status updated successfully',
-                    response: response,
-                });
-            }
-        );
+        const query = req.query.all === 'true' ? {} : { status: 'active' };
+        const responses = await Response.find(query);
+        res.json(responses);
     } catch (err) {
-        res.status(500).send(err);
+        res.status(500).json({ message: 'Server error.', error: err.message });
     }
 };
 
-// Soft Delete
-exports.deleteResponse = (req, res) => {
-    Response.findByIdAndUpdate(
-        req.params.responseId,
-        { status: 'inactive' },
-        { new: true, runValidators: true },
-        (err, response) => {
-            if (err) return res.status(500).send(err);
-            if (!response) {
-                return res.status(404).json({ message: "Response not found" });
-            }
-            res.json({ 
-                message: 'Response successfully deleted (soft delete)',
-                _id: response._id,
-            });
-        }
-    );
+// POST /responses — Create a new response
+exports.createResponse = async (req, res) => {
+    try {
+        const newResponse = new Response(req.body);
+        const response = await newResponse.save();
+        res.json(response);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error.', error: err.message });
+    }
+};
 
-    //     Response.remove({ _id: req.params.responseId }, (err, response) => {
-    //     if (err) res.send(err);
-    //     res.json({ 
-    //         message: 'Response successfully deleted',
-    //         _id: req.params.responseId,
-    //     });
-    // });
+// GET /responses/:responseId — Get a single response by ID
+exports.getResponseById = async (req, res) => {
+    try {
+        const response = await Response.findById(req.params.responseId);
+        if (!response) {
+            return res.status(404).json({ message: 'Response not found.' });
+        }
+        res.json(response);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error.', error: err.message });
+    }
+};
+
+// PUT /responses/:responseId — Update a response
+exports.updateResponse = async (req, res) => {
+    try {
+        const response = await Response.findOneAndUpdate(
+            { _id: req.params.responseId },
+            req.body,
+            { new: true }
+        );
+        if (!response) {
+            return res.status(404).json({ message: 'Response not found.' });
+        }
+        res.json(response);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error.', error: err.message });
+    }
+};
+
+// PUT /responses/:responseId/status — Update response status (Admin Only)
+exports.updateResponseStatus = async (req, res) => {
+    try {
+        const allowedStatus = ['active', 'inactive'];
+        if (!allowedStatus.includes(req.body.status)) {
+            return res.status(400).json({ message: 'Invalid status.' });
+        }
+
+        const response = await Response.findByIdAndUpdate(
+            req.params.responseId,
+            { status: req.body.status },
+            { new: true, runValidators: true }
+        );
+        if (!response) {
+            return res.status(404).json({ message: 'Response not found.' });
+        }
+        res.json({
+            message: 'Response status updated successfully.',
+            response,
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error.', error: err.message });
+    }
+};
+
+// DELETE /responses/:responseId — Soft delete a response
+exports.deleteResponse = async (req, res) => {
+    try {
+        const response = await Response.findByIdAndUpdate(
+            req.params.responseId,
+            { status: 'inactive' },
+            { new: true, runValidators: true }
+        );
+        if (!response) {
+            return res.status(404).json({ message: 'Response not found.' });
+        }
+        res.json({
+            message: 'Response successfully deleted (soft delete).',
+            _id: response._id,
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error.', error: err.message });
+    }
 };

@@ -93,13 +93,15 @@ export const ticketApi = {
     }),
 }
 
+const quizURL = 'http://localhost:3000/quiz-results/';
+
 export const quizApi = {
     submitQuizResult: handleError(async payload => {
-        const res = await axiosInstance.post('http://localhost:3000/api/quiz-results', payload);
+        const res = await axiosInstance.post(quizURL, payload);
         return res.data;
     }),
     getLeaderboard: handleError(async quizId => {
-        const res = await axiosInstance.get(`http://localhost:3000/api/quiz-results/${quizId}/leaderboard`);
+        const res = await axiosInstance.get(quizURL + quizId + '/leaderboard');
         return res.data;
     })
 };
