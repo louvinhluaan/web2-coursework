@@ -9,12 +9,14 @@ const bodyParser = require('body-parser');
 global.Response = require('./api/models/responseModel');
 require('./api/models/userModel');
 require('./api/models/ticketModel');
+require('./api/models/quizResultModel');
 
 // Routes
 const responseRoutes = require('./api/routes/responseRoutes');
 const authRoutes = require('./api/routes/authRoutes');
 const adminRoutes = require('./api/routes/adminRoutes');
 const ticketRoutes = require('./api/routes/ticketRoutes');
+const quizRoutes = require('./api/routes/quizRoutes');
 
 // Seed
 const seedAdmin = require('./api/seedAdmin');
@@ -39,6 +41,7 @@ authRoutes(app);
 responseRoutes(app);
 adminRoutes(app);
 ticketRoutes(app);
+quizRoutes(app);
 
 app.listen(port);
 app.use((req, res) => {

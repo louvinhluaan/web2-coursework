@@ -22,17 +22,23 @@
       <button class="ui button" @click="$router.push('/quiz')">Back to Training Hub</button>
     </div>
 
+    <!-- Submitting State -->
+    <div v-if="gameState === 'submitting'" class="ui active inverted dimmer">
+      <div class="ui text loader">Saving your score...</div>
+    </div>
+
     <!-- Completed State -->
-    <div v-if="gameState === 'completed'" class="ui segment center aligned placeholder">
+    <div v-if="gameState === 'completed'" class="ui segment center aligned" style="padding: 3em;">
       <div class="ui icon header">
-        <i class="trophy icon yellow"></i>
-        Quiz Completed!
+        <i class="trophy icon yellow massive"></i>
+        <div class="content" style="margin-top: 15px;">Quiz Completed!</div>
       </div>
-      <h2>Final Score: {{ score }} / 10</h2>
-      <p>Great job training your response knowledge!</p>
-      <div class="inline">
-        <button class="ui primary button" @click="startQuiz">Play Again</button>
-        <button class="ui button" @click="$router.push('/quiz')">Exit to Hub</button>
+      <h2 style="font-size: 3rem; margin-top: 10px;">{{ score }} / 10</h2>
+      <p style="color: grey; font-size: 1.2em;">Time: {{ formatTime(timeElapsed) }}</p>
+      
+      <div style="margin-top: 2em;">
+        <button class="ui primary large button" @click="startQuiz"><i class="redo icon"></i> Play Again</button>
+        <button class="ui large button" @click="$router.push('/quiz/issue-code-mastery/details')"><i class="list icon"></i> View Leaderboard</button>
       </div>
     </div>
 
@@ -100,7 +106,7 @@
 </template>
 
 <script>
-import { api } from '../../helpers/helpers';
+import { api, quizApi } from '../../helpers/helpers';
 
 export default {
   name: 'quiz',
@@ -118,7 +124,9 @@ export default {
       currentOptions: [],
       
       selectedAnswer: null,
-      feedbackState: 'idle' // 'idle', 'correct', 'wrong'
+      feedbackState: 'idle', // 'idle', 'correct', 'wrong'
+      startTime: 0,
+      timeElapsed: 0
     };
   },
   async mounted() {
@@ -146,6 +154,7 @@ export default {
       this.score = 0;
       this.questionIndex = 0;
       this.gameState = 'playing';
+      this.startTime = Date.now();
       this.generateQuestion();
     },
     generateQuestion() {
@@ -185,13 +194,36 @@ export default {
         this.feedbackState = 'wrong';
       }
     },
-    nextQuestion() {
+    async nextQuestion() {
       if (this.questionIndex >= 9) {
-        this.gameState = 'completed';
+        const endTime = Date.now();
+        this.timeElapsed = endTime - this.startTime;
+        await this.submitAndLoadLeaderboard(this.timeElapsed);
       } else {
         this.questionIndex++;
         this.generateQuestion();
       }
+    },
+    async submitAndLoadLeaderboard(timeMs) {
+      this.gameState = 'submitting';
+      try {
+        await quizApi.submitQuizResult({
+          quiz_id: 'issue-code-mastery',
+          score: this.score,
+          total_questions: 10,
+          time_elapsed_ms: timeMs
+        });
+      } catch (err) {
+        console.error("Leaderboard error", err);
+      }
+      this.gameState = 'completed';
+    },
+    formatTime(ms) {
+      if (!ms) return '0s';
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
     }
   }
 };

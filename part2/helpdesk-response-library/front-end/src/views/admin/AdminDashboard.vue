@@ -40,6 +40,12 @@
 
     <!-- Responses Tab -->
     <div class="ui bottom attached segment" v-show="activeTab === 'responses'">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 1em;">
+        <div class="ui icon input" style="width: 100%; max-width: 400px;">
+          <input type="text" v-model="responseSearchQuery" placeholder="Search responses...">
+          <i class="search icon"></i>
+        </div>
+      </div>
       <table class="ui celled compact table">
         <thead>
           <tr>
@@ -52,7 +58,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="res in responses" :key="res._id">
+          <tr v-for="res in filteredAdminResponses" :key="res._id">
             <td>{{ res.issue_code }}</td>
             <td class="truncate-cell" :title="res.response">{{ res.response }}</td>
             <td style="text-transform: capitalize;">{{ formatCategory(res.category) }}</td>
@@ -72,12 +78,23 @@
           <tr v-if="responses.length === 0">
             <td colspan="6" class="center aligned">No responses found.</td>
           </tr>
+          <tr v-if="responses.length > 0 && filteredAdminResponses.length === 0">
+            <td colspan="6" class="center aligned" style="padding: 2em; color: grey;">
+              No matching responses found.
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Staff Tab -->
     <div class="ui bottom attached segment" v-show="activeTab === 'staff'">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 1em;">
+        <div class="ui icon input" style="width: 100%; max-width: 400px;">
+          <input type="text" v-model="staffSearchQuery" placeholder="Search staff...">
+          <i class="search icon"></i>
+        </div>
+      </div>
       <table class="ui celled compact table">
         <thead>
           <tr>
@@ -90,7 +107,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user._id">
+          <tr v-for="user in filteredUsers" :key="user._id">
             <td class="truncate-cell" :title="user.username">{{ user.username }}</td>
             <td class="truncate-cell" :title="user.fullName">{{ user.fullName }}</td>
             <td class="truncate-cell" :title="user.email">{{ user.email }}</td>
@@ -106,12 +123,23 @@
               </button>
             </td>
           </tr>
+          <tr v-if="users.length > 0 && filteredUsers.length === 0">
+            <td colspan="6" class="center aligned" style="padding: 2em; color: grey;">
+              No matching staff members found.
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Tickets Tab -->
     <div class="ui bottom attached segment" v-show="activeTab === 'tickets'">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 1em;">
+        <div class="ui icon input" style="width: 100%; max-width: 400px;">
+          <input type="text" v-model="ticketSearchQuery" placeholder="Search tickets...">
+          <i class="search icon"></i>
+        </div>
+      </div>
       <table class="ui celled compact table">
         <thead>
           <tr>
@@ -124,7 +152,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="ticket in tickets" :key="ticket._id">
+          <tr v-for="ticket in filteredAdminTickets" :key="ticket._id">
             <td class="truncate-cell" :title="ticket.subject">{{ ticket.subject }}</td>
             <td style="text-transform: capitalize;">{{ formatCategory(ticket.category) }}</td>
             <td class="truncate-cell" :title="ticket.submitted_by ? ticket.submitted_by.fullName : ''">
@@ -144,6 +172,11 @@
           </tr>
           <tr v-if="tickets.length === 0">
             <td colspan="6" class="center aligned">No tickets found.</td>
+          </tr>
+          <tr v-if="tickets.length > 0 && filteredAdminTickets.length === 0">
+            <td colspan="6" class="center aligned" style="padding: 2em; color: grey;">
+              No matching tickets found.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -266,6 +299,9 @@ export default {
       users: [],
       tickets: [],
       responses: [],
+      staffSearchQuery: '',
+      responseSearchQuery: '',
+      ticketSearchQuery: '',
       // Edit user modal
       showEditModal: false,
       editUser: {},
@@ -279,6 +315,34 @@ export default {
       ticketError: '',
       ticketSuccess: '',
     };
+  },
+  computed: {
+    filteredUsers() {
+      if (!this.staffSearchQuery) return this.users;
+      const query = this.staffSearchQuery.toLowerCase();
+      return this.users.filter(u => 
+        (u.username && u.username.toLowerCase().includes(query)) ||
+        (u.fullName && u.fullName.toLowerCase().includes(query)) ||
+        (u.email && u.email.toLowerCase().includes(query))
+      );
+    },
+    filteredAdminResponses() {
+      if (!this.responseSearchQuery) return this.responses;
+      const query = this.responseSearchQuery.toLowerCase();
+      return this.responses.filter(r => 
+        (r.issue_code && r.issue_code.toLowerCase().includes(query)) ||
+        (r.response && r.response.toLowerCase().includes(query)) ||
+        (r.category && r.category.toLowerCase().includes(query))
+      );
+    },
+    filteredAdminTickets() {
+      if (!this.ticketSearchQuery) return this.tickets;
+      const query = this.ticketSearchQuery.toLowerCase();
+      return this.tickets.filter(t => 
+        (t.subject && t.subject.toLowerCase().includes(query)) ||
+        (t.category && t.category.toLowerCase().replace(/_/g, ' ').includes(query))
+      );
+    }
   },
   async mounted() {
     await this.loadData();

@@ -7,6 +7,13 @@
       </router-link>
     </div>
 
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1em;">
+      <div class="ui icon input" style="width: 100%; max-width: 400px;">
+        <input type="text" v-model="searchQuery" placeholder="Search your tickets by subject or category...">
+        <i class="search icon"></i>
+      </div>
+    </div>
+
     <table class="ui celled compact table">
       <thead>
         <tr>
@@ -18,7 +25,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="ticket in tickets" :key="ticket._id">
+        <tr v-for="ticket in filteredTickets" :key="ticket._id">
           <td class="truncate-cell" :title="ticket.subject">{{ ticket.subject }}</td>
           <td style="text-transform: capitalize;">{{ formatCategory(ticket.category) }}</td>
           <td>
@@ -37,6 +44,11 @@
           <td colspan="5" class="center aligned">
             No tickets yet. 
             <router-link to="/tickets/new">Create one</router-link>
+          </td>
+        </tr>
+        <tr v-if="tickets.length > 0 && filteredTickets.length === 0">
+          <td colspan="5" class="center aligned" style="padding: 2em; color: grey;">
+            No matching tickets found.
           </td>
         </tr>
       </tbody>
@@ -90,9 +102,20 @@ export default {
   data() {
     return {
       tickets: [],
+      searchQuery: '',
       showTicketModal: false,
       viewTicket: {},
     };
+  },
+  computed: {
+    filteredTickets() {
+      if (!this.searchQuery) return this.tickets;
+      const query = this.searchQuery.toLowerCase();
+      return this.tickets.filter(t => 
+        (t.subject && t.subject.toLowerCase().includes(query)) ||
+        (t.category && t.category.toLowerCase().replace(/_/g, ' ').includes(query))
+      );
+    }
   },
   async mounted() {
     this.tickets = await ticketApi.getMyTickets() || [];

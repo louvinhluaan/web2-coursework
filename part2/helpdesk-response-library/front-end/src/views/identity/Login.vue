@@ -2,11 +2,11 @@
   <div class="auth-page">
     <div class="auth-container">
       <div class="ui segment">
-        <h2 class="ui header center aligned">
-          <i class="sign in alternate icon"></i>
+        <h2 class="ui header center aligned" style="display: block !important; margin-bottom: 20px;">
+          <img src="/logo.png" alt="Helpdesk Logo" style="width: 85px; display: block; margin: 0 auto 15px auto;" />
           <div class="content">
             Login
-            <div class="sub header">Helpdesk Response Library</div>
+            <div class="sub header" style="margin-top: 10px;">Helpdesk Response Library</div>
           </div>
         </h2>
 

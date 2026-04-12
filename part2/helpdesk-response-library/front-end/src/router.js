@@ -6,8 +6,9 @@ import Responses from './views/responses/Responses.vue';
 import New from './views/responses/New.vue';
 import Show from './views/responses/Show.vue';
 import Edit from './views/responses/Edit.vue';
-import QuizDashboard from './views/responses/QuizDashboard.vue';
-import Quiz from './views/responses/Quiz.vue';
+import QuizDashboard from './views/quizzes/QuizDashboard.vue';
+import QuizDetails from './views/quizzes/QuizDetails.vue';
+import Quiz from './views/quizzes/Quiz.vue';
 import Login from './views/identity/Login.vue';
 import Register from './views/identity/Register.vue';
 import Profile from './views/identity/Profile.vue';
@@ -90,6 +91,12 @@ const router = new Router({
             path: '/quiz',
             name: 'quiz-dashboard',
             component: QuizDashboard,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/quiz/issue-code-mastery/details',
+            name: 'quiz-details',
+            component: QuizDetails,
             meta: { requiresAuth: true }
         },
         {

@@ -92,3 +92,14 @@ export const ticketApi = {
         return res.data;
     }),
 }
+
+export const quizApi = {
+    submitQuizResult: handleError(async payload => {
+        const res = await axiosInstance.post('http://localhost:3000/api/quiz-results', payload);
+        return res.data;
+    }),
+    getLeaderboard: handleError(async quizId => {
+        const res = await axiosInstance.get(`http://localhost:3000/api/quiz-results/${quizId}/leaderboard`);
+        return res.data;
+    })
+};

@@ -18,9 +18,9 @@
             Test your knowledge by matching Issue Codes to exact Response content and vice versa. 
           </div>
         </div>
-        <div class="ui bottom attached primary button" style="background-color: #2185d0; color: white;" tabindex="0" @click="$router.push('/quiz/play')">
-          <i class="play icon"></i>
-          Start Quiz
+        <div class="ui bottom attached primary button" style="background-color: #2185d0; color: white;" tabindex="0" @click="$router.push('/quiz/issue-code-mastery/details')">
+          <i class="sign in icon"></i>
+          Join Quiz
         </div>
       </div>
 

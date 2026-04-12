@@ -221,10 +221,27 @@ export default {
 
 /* Auth Pages (Login / Register) */
 .auth-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('../public/background.jpg');
+  background-size: cover;
+  background-position: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
+  z-index: 100;
+}
+.myFlash {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 90%;
+  max-width: 600px;
 }
 .auth-container {
   width: 100%;
