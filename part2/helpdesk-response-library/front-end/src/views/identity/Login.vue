@@ -87,7 +87,7 @@ export default {
       this.isLoading = true;
       try {
         await auth.login(this.username, this.password);
-        this.$router.push('/responses');
+        this.$router.push('/home');
       } catch (err) {
         if (err.response && err.response.data) {
           this.error = err.response.data.message;

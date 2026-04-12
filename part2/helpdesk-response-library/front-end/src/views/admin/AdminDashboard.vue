@@ -285,6 +285,7 @@
 <script>
 import { adminApi } from '../../helpers/admin';
 import { api } from '../../helpers/helpers';
+import { auth } from '../../helpers/auth';
 
 export default {
   name: 'admin-dashboard',
@@ -408,6 +409,13 @@ export default {
         // Refresh data
         this.users = await adminApi.getAllUsers();
         this.stats = await adminApi.getStats();
+        
+        // Update localStorage and sync all components
+        const currentUser = auth.getUser();
+        if (currentUser && currentUser._id === this.editUser._id) {
+          await auth.refreshUser();
+        }
+        
         setTimeout(() => { this.showEditModal = false; }, 1000);
       } catch (err) {
         this.editError = err.response ? err.response.data.message : 'An error occurred.';

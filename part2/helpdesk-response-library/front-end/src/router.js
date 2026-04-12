@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import { auth } from './helpers/auth';
 
+import Home from './views/Home.vue';
 import Responses from './views/responses/Responses.vue';
 import New from './views/responses/New.vue';
 import Show from './views/responses/Show.vue';
@@ -25,7 +26,13 @@ const router = new Router({
     routes: [
         {
             path: '/',
-            redirect: '/responses'
+            redirect: '/home'
+        },
+        {
+            path: '/home',
+            name: 'home',
+            component: Home,
+            meta: { requiresAuth: true }
         },
         {
             path: '/login',

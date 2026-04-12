@@ -7,7 +7,10 @@
           <div class="header item" style="padding: 0 10px 0 0; border: none; align-self: center;">
             <img src="/logo.png" alt="App Logo" style="height: 40px; object-fit: contain;">
           </div>
-          <router-link to="/responses" exact class="item" style="border: none;">
+          <router-link to="/home" class="item" style="border: none;">
+            <i class="home icon"></i> Home
+          </router-link>
+          <router-link to="/responses" class="item" style="border: none;">
             <i class="comment outline icon"></i> Responses
           </router-link>
           <router-link to="/tickets" class="item">
@@ -95,6 +98,10 @@ export default {
     },
   },
   methods: {
+    updateAuthUser() {
+      this.isLoggedIn = auth.isLoggedIn();
+      this.currentUser = auth.getUser() || {};
+    },
     closeDropdown() {
       this.showDropdown = false;
     },
@@ -105,6 +112,12 @@ export default {
       this.currentUser = {};
       this.$router.push('/login');
     },
+  },
+  mounted() {
+    window.addEventListener('user-updated', this.updateAuthUser);
+  },
+  beforeDestroy() {
+    window.removeEventListener('user-updated', this.updateAuthUser);
   },
 };
 </script>

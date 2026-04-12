@@ -43,6 +43,12 @@ export default {
       return this.user.role.charAt(0).toUpperCase() + this.user.role.slice(1);
     },
   },
+  watch: {
+    '$route'() {
+      // Refresh user data when navigating to profile
+      this.user = auth.getUser() || {};
+    },
+  },
 };
 </script>
 

@@ -2,6 +2,23 @@ import axios from 'axios';
 
 const baseURL = 'http://localhost:3000/auth/';
 
+const axiosInstance = axios.create();
+
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+const handleError = fn => (...params) =>
+    fn(...params).catch(error => {
+        if (error.response) {
+            vm.flash(`${error.response.status}: ${error.response.statusText}`, 'error');
+        }
+    });
+
 export const auth = {
     async login(username, password) {
         const res = await axios.post(baseURL + 'login', { username, password });
@@ -11,10 +28,10 @@ export const auth = {
         return res.data;
     },
 
-    async register(payload) {
+    register: handleError(async (payload) => {
         const res = await axios.post(baseURL + 'register', payload);
         return res.data;
-    },
+    }),
 
     logout() {
         localStorage.removeItem('token');
@@ -33,6 +50,18 @@ export const auth = {
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
+
+    updateUser(userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+        window.dispatchEvent(new Event('user-updated'));
+    },
+
+    refreshUser: handleError(async () => {
+        const res = await axiosInstance.get(baseURL + 'profile');
+        const user = res.data;
+        auth.updateUser(user);
+        return user;
+    }),
 
     isAdmin() {
         const user = this.getUser();

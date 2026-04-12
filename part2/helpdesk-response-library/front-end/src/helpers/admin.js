@@ -25,32 +25,39 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+const handleError = fn => (...params) =>
+    fn(...params).catch(error => {
+        if (error.response) {
+            vm.flash(`${error.response.status}: ${error.response.statusText}`, 'error');
+        }
+    });
+
 export const adminApi = {
     // Stats
-    async getStats() {
+    getStats: handleError(async () => {
         const res = await axiosInstance.get(baseURL + 'admin/stats');
         return res.data;
-    },
+    }),
 
     // Users
-    async getAllUsers() {
+    getAllUsers: handleError(async () => {
         const res = await axiosInstance.get(baseURL + 'admin/users');
         return res.data;
-    },
+    }),
 
-    async updateUser(id, payload) {
+    updateUser: handleError(async (id, payload) => {
         const res = await axiosInstance.put(baseURL + 'admin/users/' + id, payload);
         return res.data;
-    },
+    }),
 
     // Tickets (admin view)
-    async getAllTickets() {
+    getAllTickets: handleError(async () => {
         const res = await axiosInstance.get(baseURL + 'tickets');
         return res.data;
-    },
+    }),
 
-    async updateTicketStatus(id, payload) {
+    updateTicketStatus: handleError(async (id, payload) => {
         const res = await axiosInstance.put(baseURL + 'tickets/' + id + '/status', payload);
         return res.data;
-    },
+    }),
 };
