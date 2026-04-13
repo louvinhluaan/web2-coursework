@@ -15,7 +15,7 @@ const seedAdmin = async () => {
             await admin.save();
             console.log('Default admin account created');
         } else {
-            console.log('Admin account already exists, skipping seed.');
+            console.log('Seed execution finished.');
         }
     } catch (err) {
         console.error('Error seeding admin account:', err.message);
